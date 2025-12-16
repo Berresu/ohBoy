@@ -1,14 +1,16 @@
 package com.example.a15122025
 
-import android.R.attr.type
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavType
@@ -61,11 +64,16 @@ fun AppNav() {
         composable("home") {
             HomeScreen(navController)
         }
-        composable("detail/{name}", arguments = listOf(navArgument("name") {
-            type = NavType.StringType
-        })) { backStackEntry ->
+        composable("detail/{name}/{imageId}", arguments = listOf(
+            navArgument("name") {
+                type = NavType.StringType },
+            navArgument("imageId") {
+                type = NavType.IntType}
+        )
+        ) { backStackEntry ->
             val itemName = backStackEntry.arguments?.getString("name") ?: "Bilinmeyen Öge"
-            DetailScreen(itemName)
+            val imageId = backStackEntry.arguments?.getInt("imageId") ?: 0
+            DetailScreen(itemName, imageId)
         }
     }
 }
@@ -80,6 +88,16 @@ fun HomeScreen(navController: NavController) {
         "Yekta",
         "HIM"
     )
+
+    val itemImageResources = mapOf(
+        "Yoongi" to R.drawable.yoongi,
+        "Connor" to R.drawable.connor,
+        "Remus" to R.drawable.remus,
+        "Loki" to R.drawable.loki,
+        "Yekta" to R.drawable.yekta,
+        "HIM" to R.drawable.him
+    )
+
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 16.dp),
@@ -89,24 +107,8 @@ fun HomeScreen(navController: NavController) {
             CarouselCard(
                 title = item,
                 onClick = {
-                    if (item == "Yoongi") {
-                        navController.navigate("detail/$item")
-                    }
-                    else if (item == "Connor") {
-                        navController.navigate("detail/$item")
-                    }
-                    else if (item == "Remus") {
-                        navController.navigate("detail/$item")
-                    }
-                    else if (item == "Loki") {
-                        navController.navigate("detail/$item")
-                    }
-                    else if (item == "Yekta") {
-                        navController.navigate("detail/$item")
-                    }
-                    else if (item == "HIM") {
-                        navController.navigate("detail/$item")
-                    }
+                    val imageId = itemImageResources[item] ?: 0
+                    navController.navigate("detail/$item/$imageId")
                 }
             )
         }
@@ -139,11 +141,19 @@ fun CarouselCard(
 }
 
 @Composable
-fun DetailScreen(name: String) {
-    Box(
+fun DetailScreen(name: String, imageId: Int) {
+    Column(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
+        if (imageId != 0) {
+            Image(
+                painter = painterResource(id = imageId),
+                contentDescription = name
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "$name Detay Sayfası",
             style = MaterialTheme.typography.headlineMedium
